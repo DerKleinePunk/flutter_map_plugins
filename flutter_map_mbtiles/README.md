@@ -25,7 +25,7 @@ for [flutter_map](https://pub.dev/packages/flutter_map).
 
 ```yaml
 dependencies:
-  flutter_map: ^6.0.0         # in case you don't have it yet 
+  flutter_map: ^8.0.0         # in case you don't have it yet
   flutter_map_mbtiles: ^1.0.0 # this package
 ```
 
@@ -33,7 +33,7 @@ dependencies:
 
 ```dart
 // provide the path of the MBTiles file to the tile provider.
-// The file must be on your file system and the app must have the permission 
+// The file must be on your file system and the app must have the permission
 // to access to it. The file can't be in your assets.
 final _futureTileProvider = MbTilesTileProvider
     .fromSource('path/to/file.mbtiles');

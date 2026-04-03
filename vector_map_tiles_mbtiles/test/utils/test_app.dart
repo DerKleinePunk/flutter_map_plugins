@@ -1,7 +1,5 @@
-/*
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:latlong2/latlong.dart';
 import 'package:mbtiles/mbtiles.dart';
 import 'package:vector_map_tiles/vector_map_tiles.dart';
 import 'package:vector_map_tiles_mbtiles/vector_map_tiles_mbtiles.dart';
@@ -34,4 +32,3 @@ class TestApp extends StatelessWidget {
     );
   }
 }
-*/

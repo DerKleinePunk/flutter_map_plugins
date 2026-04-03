@@ -1,58 +1,51 @@
-/*
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/mockito.dart';
+import 'package:pmtiles/pmtiles.dart';
 import 'package:vector_map_tiles/vector_map_tiles.dart';
-import 'package:vector_map_tiles_pmtiles/src/vector_tile_provider.dart';
+import 'package:vector_map_tiles_pmtiles/vector_map_tiles_pmtiles.dart';
 
 import 'integration_test.mocks.dart';
 
 Future<void> main() async {
-  test('Create tile provider from archive', () async {
+  test('Create tile provider from archive', () {
     final mockPmTiles = MockPmTilesArchive();
     final provider = PmTilesVectorTileProvider.fromArchive(mockPmTiles);
     expect(provider.archive, equals(mockPmTiles));
     expect(provider.type, TileProviderType.vector);
   });
-  test('Create tile provider from source', () async {
-    const source =
-        'https://raw.githubusercontent.com/protomaps/PMTiles/main/spec/v3/protomaps(vector)ODbL_firenze.pmtiles';
-    final provider = await PmTilesVectorTileProvider.fromSource(source);
-    expect(provider.type, TileProviderType.vector);
-    expect(
-      provider.archive.centerPosition.latitude,
-      closeTo(43.779779, 0.001),
+
+  test('Provide tile bytes from archive', () async {
+    final mockPmTiles = MockPmTilesArchive();
+    when(mockPmTiles.tile(any)).thenAnswer(
+      (_) async => Tile(
+        0,
+        bytes: Uint8List.fromList([1, 2, 3]),
+        compression: Compression.none,
+        type: TileType.mvt,
+      ),
     );
-    expect(
-      provider.archive.centerPosition.longitude,
-      closeTo(11.2414827, 0.001),
-    );
-    expect(provider.maximumZoom, equals(14));
-    expect(provider.minimumZoom, equals(0));
+
+    final provider = PmTilesVectorTileProvider.fromArchive(mockPmTiles);
     expect(
       await provider.provide(TileIdentity(0, 0, 0)),
-      isA<Uint8List>(),
-    );
-    await expectLater(
-      provider.provide(TileIdentity(10, 1, 1)),
-      throwsA(isA<ProviderException>()),
+      equals(Uint8List.fromList([1, 2, 3])),
     );
   });
-  test('Ignores tiles that are not found', () async {
-    const source =
-        'https://raw.githubusercontent.com/protomaps/PMTiles/main/spec/v3/protomaps(vector)ODbL_firenze.pmtiles';
-    final provider = await PmTilesVectorTileProvider.fromSource(source);
-    expect(
-      await provider.provide(TileIdentity(0, 0, 0)),
-      isA<Uint8List>(),
-    );
+
+  test('Throws provider exception for missing tile', () async {
+    final mockPmTiles = MockPmTilesArchive();
+    when(mockPmTiles.tile(any)).thenThrow(TileNotFoundException(0));
+
+    final provider = PmTilesVectorTileProvider.fromArchive(mockPmTiles);
     await expectLater(
-      provider.provide(TileIdentity(10, 1, 1)),
+      provider.provide(TileIdentity(1, 1, 1)),
       throwsA(isA<ProviderException>()),
     );
   });
 
-  test('Accepts a type', () async {
+  test('Accepts a type', () {
     final mockPmTiles = MockPmTilesArchive();
     final provider = PmTilesVectorTileProvider.fromArchive(
       mockPmTiles,
@@ -61,4 +54,3 @@ Future<void> main() async {
     expect(provider.type, TileProviderType.raster);
   });
 }
-*/

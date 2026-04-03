@@ -36,3 +36,7 @@ coverage/filtered.lcov.info
 
 # ignore generated files by melos
 pubspec_overrides.yaml
+
+#ignore example
+example/
+.vscode/settings.json
