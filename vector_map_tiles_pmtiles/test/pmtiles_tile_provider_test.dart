@@ -1,12 +1,12 @@
 import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:pmtiles/pmtiles.dart';
 import 'package:vector_map_tiles/vector_map_tiles.dart';
 import 'package:vector_map_tiles_pmtiles/vector_map_tiles_pmtiles.dart';
 
-import 'integration_test.mocks.dart';
+class MockPmTilesArchive extends Mock implements PmTilesArchive {}
 
 Future<void> main() async {
   test('Create tile provider from archive', () {
@@ -15,19 +15,21 @@ Future<void> main() async {
     expect(provider.archive, equals(mockPmTiles));
     expect(provider.type, TileProviderType.vector);
   });
-
-  test('Provide tile bytes from archive', () async {
-    final mockPmTiles = MockPmTilesArchive();
-    when(mockPmTiles.tile(any)).thenAnswer(
-      (_) async => Tile(
-        0,
-        bytes: Uint8List.fromList([1, 2, 3]),
-        compression: Compression.none,
-        type: TileType.mvt,
-      ),
+  test('Create tile provider from source', () async {
+    const source =
+        'https://raw.githubusercontent.com/protomaps/PMTiles/main/spec/v3/protomaps(vector)ODbL_firenze.pmtiles';
+    final provider = await PmTilesVectorTileProvider.fromSource(source);
+    expect(provider.type, TileProviderType.vector);
+    expect(
+      provider.archive.centerPosition.latitude,
+      closeTo(43.7672134, 0.1),
     );
-
-    final provider = PmTilesVectorTileProvider.fromArchive(mockPmTiles);
+    expect(
+      provider.archive.centerPosition.longitude,
+      closeTo(11.2543435, 0.1),
+    );
+    expect(provider.maximumZoom, equals(15));
+    expect(provider.minimumZoom, equals(0));
     expect(
       await provider.provide(TileIdentity(0, 0, 0)),
       equals(Uint8List.fromList([1, 2, 3])),
