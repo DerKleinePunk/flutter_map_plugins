@@ -4,12 +4,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:pmtiles/pmtiles.dart';
 import 'package:vector_map_tiles/vector_map_tiles.dart';
-import 'package:vector_map_tiles_pmtiles/vector_map_tiles_pmtiles.dart';
+import 'package:vector_map_tiles_pmtiles/src/vector_tile_provider.dart';
 
 class MockPmTilesArchive extends Mock implements PmTilesArchive {}
 
 Future<void> main() async {
-  test('Create tile provider from archive', () {
+  test('Create tile provider from archive', () async {
     final mockPmTiles = MockPmTilesArchive();
     final provider = PmTilesVectorTileProvider.fromArchive(mockPmTiles);
     expect(provider.archive, equals(mockPmTiles));
@@ -32,22 +32,28 @@ Future<void> main() async {
     expect(provider.minimumZoom, equals(0));
     expect(
       await provider.provide(TileIdentity(0, 0, 0)),
-      equals(Uint8List.fromList([1, 2, 3])),
+      isA<Uint8List>(),
+    );
+    await expectLater(
+      provider.provide(TileIdentity(10, 1, 1)),
+      throwsA(isA<ProviderException>()),
     );
   });
-
-  test('Throws provider exception for missing tile', () async {
-    final mockPmTiles = MockPmTilesArchive();
-    when(mockPmTiles.tile(any)).thenThrow(TileNotFoundException(0));
-
-    final provider = PmTilesVectorTileProvider.fromArchive(mockPmTiles);
+  test('Ignores tiles that are not found', () async {
+    const source =
+        'https://raw.githubusercontent.com/protomaps/PMTiles/main/spec/v3/protomaps(vector)ODbL_firenze.pmtiles';
+    final provider = await PmTilesVectorTileProvider.fromSource(source);
+    expect(
+      await provider.provide(TileIdentity(0, 0, 0)),
+      isA<Uint8List>(),
+    );
     await expectLater(
-      provider.provide(TileIdentity(1, 1, 1)),
+      provider.provide(TileIdentity(10, 1, 1)),
       throwsA(isA<ProviderException>()),
     );
   });
 
-  test('Accepts a type', () {
+  test('Accepts a type', () async {
     final mockPmTiles = MockPmTilesArchive();
     final provider = PmTilesVectorTileProvider.fromArchive(
       mockPmTiles,
