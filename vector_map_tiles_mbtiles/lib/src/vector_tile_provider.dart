@@ -65,4 +65,11 @@ class MbTilesVectorTileProvider extends VectorTileProvider {
 
   @override
   TileOffset get tileOffset => TileOffset.DEFAULT;
+
+  /// The tiles are already on local storage, so they skip the file cache of
+  /// vector_map_tiles. Overrides `VectorTileProvider.cacheable` from the
+  /// `local_map_pi` fork; without `@override`, because the released
+  /// vector_map_tiles does not have it yet.
+  // ignore: annotate_overrides
+  bool get cacheable => false;
 }
